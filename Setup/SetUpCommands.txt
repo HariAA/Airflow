@@ -1,0 +1,50 @@
+
+--create postgres sql instance
+az postgres server create --resource-group <Resource Group Name> --name <ServerName> --location uksouth --sku-name B_Gen5_1 --storage-size 10240 --auto-grow Disabled --admin-user <UserName> --admin-password <PWD>
+
+--create postgres db 
+az postgres db create --name airflowdb --resource-group <Resource Group Name> --server-name <ServerName>
+
+-- create AKS cluster
+
+az aks create --name AnvayAKS --resource-group <Resource Group Name> --node-count 1 --node-vm-size Standard_B2ms --enable-managed-identity --attach-acr anvayacr --zones 1 --generate-ssh-keys
+
+-- get credentials
+az aks get-credentials --resource-group ResourceGroup2 --name AnvayAKS
+
+
+--Create Secrets
+-- create secret to your git
+kubectl create secret generic git-credentials --namespace airflow --from-literal=GIT_SYNC_USERNAME=<UserName> --from-literal=GIT_SYNC_PASSWORD=<PWD>
+
+--create secret for postgres
+kubectl create secret generic db-credentials --namespace airflow --from-literal=connection=postgresql+psycopg2://<UserName>%40<ServerName>:<>PWD@<ServerName>.postgres.database.azure.com/airflowdb
+
+--create connection to azure container registry
+kubectl create secret docker-registry anvayacr --namespace airflow  --docker-server=anvayacr.azurecr.io --docker-username=<UserName> --docker-password=<PWD>
+
+-- create names space
+
+kubectl create namespace airflow
+
+-- helm install airflow
+
+helm install airflow airflow --namespace airflow --values .\airflow\values.yaml --debug
+
+-- install ingress controller
+
+helm install nginx-ingress ingress-nginx/ingress-nginx --namespace airflow --set controller.replicaCount=1 --set controller.nodeSelector."beta\.kubernetes\.io/os"=linux --set defaultBackend.nodeSelector."beta\.kubernetes\.io/os"=linux --set controller.admissionWebhooks.patch.nodeSelector."beta\.kubernetes\.io/os"=linux
+
+
+-- apply ingress route to webserver
+kubectl apply -f airflow-ingress.yaml 
+
+
+
+--create airflow connection to log data into a storage account
+
+id=azurelogconnid
+username=<StorageAccountName>
+pwd=<StorageAccountKey>
+
+
