@@ -4,7 +4,7 @@
   The below section covers the following areas:
   1. Infra Requirement
   2. Prepare Airflow image
-  3. Azure Enterprise Applicatio Changes
+  3. Azure Enterprise Application Changes
   4. Changes to Values.yaml
   5. Set up Instruction
 
@@ -17,3 +17,7 @@
    - GIT Repo: A git repo which will host all the airflow dags.
  
  # Prepare Airflow image
+  The base image of airflow 2.0.0 didnt have databricks providers. So i created a custom image by extending the base image and adding databricks provider. The databricks provider is useful in submitting job on databricks compute. It uses the databricks jobs api to submit a job for execution on databricks cluster, monitors the run and reports the status back in the dag tree. There are other spark connectors which can be used to submit spark job on a open source implementation of spark using spark submit. I have build the image and deployed it on the Azure Container Registry
+  
+ # Azure Enterprice Application Changes
+ 
