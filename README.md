@@ -50,7 +50,14 @@
  
  ## Set up Instructions:
  
- The
+ The SetUpCommands.txt contains all the necessary commands to install the above set up. In summary it consists of commands to:
+ 1. Create a postgres sql resource
+ 2. Create AKS cluster and get credentials to run remaining set up using kubectl
+ 3. Create secrets for container registry, git and postgress connections
+ 4. create seperate namespace for airflow
+ 5. helm install to install teh airflow helm chart and pass the custom.yaml file
+ 6. helm install to install nginx controller and configuring to the webserver
+ 
  
  
  
